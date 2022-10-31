@@ -6,6 +6,7 @@
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 # importing the data file
 df = pd.read_csv('AlyrNorway_SpMaF12.txt', delim_whitespace = True)
@@ -21,43 +22,32 @@ print(df.columns)
 # 'Win' shows the situation in the spring and shows after winter survival and 'Sum' refers to end of summer survey.  
 
 # Survival is calculated as proportion of plants alive after planting at each time point, so that the effect of dying right after planting
-# can be removed, as it is not natural and can be sourve of error.  
+# can be removed, as it is not natural and can be source of error.
 
-#survival_summer0 = df['SurvSum0'].sum()/df['SurvPla'].sum()
+# calculating survival after planting by population group
 
+survivalPla = df.groupby(['Pop'])['SurvPla'].sum() #number of plants alive after a few days after being planted outside
 
-# proportion of plants alive at each time point in each popoultation relative to those alive after planting. This needs to be made into a dataframe.
-survivalPla = df.groupby(['Pop'])['SurvPla'].sum()                      #number of plants alive after a few days after being planted outside
-survivalSummer0 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #end of the summer they were planted
-survivalWinter1 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after first winter
-survivalSummer1 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after first summer
-survivalWinter2 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after second winter
-survivalSummer2 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after second summer
-survivalWinter3 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after third winter
-survivalSummer3 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after third summer
-survivalWinter4 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after fourth winter
-survivalSummer4 = df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla    #after fourth summer
+# proportion of plants alive at each time point in each population relative to those alive after planting into a numpy array
 
+survivalNorway = np.array([
+    df.groupby(['Pop'])['SurvSum0'].sum()/ survivalPla,    #end of the summer they were planted
+    df.groupby(['Pop'])['SurvWin1'].sum()/ survivalPla,    #after first winter
+    df.groupby(['Pop'])['SurvSum1'].sum()/ survivalPla,    #after first summer
+    df.groupby(['Pop'])['SurvWin2'].sum()/ survivalPla,    #after second winter
+    df.groupby(['Pop'])['SurvSum2'].sum()/ survivalPla,    #after second summer
+    df.groupby(['Pop'])['SurvWin3'].sum()/ survivalPla,    #after third winter
+    df.groupby(['Pop'])['SurvSum3'].sum()/ survivalPla,    #after third summer
+    df.groupby(['Pop'])['SurvWin4'].sum()/ survivalPla,    #after fourth winter
+    df.groupby(['Pop'])['SurvSum4'].sum()/ survivalPla])    #after fourth summer
+print(survivalNorway)
 
+# turning the numpy array into a pandas dataframe with columns labels
+df_survivalNorway = pd.DataFrame(data = survivalNorway, columns=['F1', 'F2', 'N', 'S'])
 
-print(survivalPla)
-print(survivalSummer0)
+print(df_survivalNorway)
 
+# creating the line plot
 
-#print(survival_summer0)
-
-
-#def draw_line_plot():
-    # Draw line plot
-    #fig,ax = plt.subplots()
-    #plt.figure(figsize= (9,14))
-    #plt.plot('value', c='b', data=df)
-    #plt.ylabel('Survival')
-    #plt.xlabel('Year')
-    #plt.title('xxx')
-    #plt.show()  
-    
-
-    # Save image and return fig (don't change this part)
-    #fig.savefig('line_plot.png')
-    #return fig
+plt.plot(df_survivalNorway.index, df_survivalNorway)
+plt.show()
